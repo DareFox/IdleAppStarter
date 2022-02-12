@@ -7,7 +7,7 @@ namespace IdleSharedLib
     public class Logger
     {
         private static string file = $"{DateTimeOffset.Now.ToUnixTimeSeconds()}-{Environment.ProcessId}-{Process.GetCurrentProcess().ProcessName}.txt";
-        private static string dir = Environment.CurrentDirectory + "/logs";
+        private static string dir = Environment.CurrentDirectory + "\\logs\\";
         public static void Log(string message)
         {
             var formatedMessage = $"[LOG, {DateTime.Now}] " + message.Trim();
