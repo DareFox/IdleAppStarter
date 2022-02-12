@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "IdleUserApp": {
+      "commandName": "Project",
+      "commandLineArgs": "-i 1000 -e C:\\Users\\DareFox\\Desktop\\xenia.exe -p 23222"
+    }
+  }
+}
