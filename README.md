@@ -1,5 +1,5 @@
 # IdleAppStarter 
-![](https://raw.githubusercontent.com/DareFox/IdleAppStarter/master/githubMedia/IdleIcon.png)
+![](https://github.com/DareFox/IdleAppStarter/raw/master/githubMedia/600px.png)
 
 ## Purpose
 The goal of IdleStarterApp is to run applications when the user is inactive, even when the user is on Logon screen.
