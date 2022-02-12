@@ -2,8 +2,7 @@
 ![](https://github.com/DareFox/IdleAppStarter/raw/master/githubMedia/600px.png)
 
 ## Purpose
-The goal of IdleStarterApp is to run applications when the user is inactive, even when the user is on Logon screen.
-
+The goal of IdleStarterApp is to run applications when the user is inactive, even when the user is not logged in 
 
 ## How to install
 [Download latest version of IdleAppStarter](https://github.com/DareFox/IdleAppStarter/releases/latest "Download latest version of IdleAppStarter") and then unzip it. For making server-side work as Windows Service you need to download [NSSM](https://nssm.cc/ "NSSM") and unzip it somewhere too.
