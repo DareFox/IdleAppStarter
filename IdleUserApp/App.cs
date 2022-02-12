@@ -3,6 +3,7 @@ using IdleSharedLib;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using ZetaIpc.Runtime.Client;
@@ -12,6 +13,7 @@ namespace IdleUserApp
     class App
     {
         static bool isIdle = false;
+        static bool isPingSuccess = false;
         static void Main(string[] args)
         {
             Parser.Default.ParseArguments<Config>(args)
@@ -41,9 +43,10 @@ namespace IdleUserApp
                 Thread.Sleep(1000);
                 var idle = IdleTimeFinder.GetIdleTime();
 
+                // TODO: Simplify if's
                 if (idle > cfg.idle)
                 {
-                    if (!isIdle) // Status was changed
+                    if (!isIdle && isPingSuccess) // Status was changed
                     {
                         Logger.Log($"Current idle time ({idle}ms) > Trigger idle ({cfg.idle}ms)");
                         isIdle = true;
@@ -72,9 +75,12 @@ namespace IdleUserApp
                 try
                 {
                     client.Send($"Ping! ID: {Process.GetCurrentProcess().Id}; isIdle: {isIdle}");
-                } catch (Exception ex)
+                    isPingSuccess = true;
+                } catch (WebException ex)
                 {
-                    Logger.Log(ex.Message);
+                    Logger.LogToFile(ex.ToString());
+                    Logger.Log("Can't connect to Service. App will not start any processes, until establishing connection");
+                    isPingSuccess = false;
                 }
             }
         }
