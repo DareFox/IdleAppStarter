@@ -18,5 +18,15 @@ namespace IdleSharedLib
             Directory.CreateDirectory(dir);
             File.AppendAllText(dir + file, formatedMessage + "\n");
         }
+
+        public static void LogToFile(string message)
+        {
+            var formatedMessage = $"[LOG, {DateTime.Now}] " + message.Trim();
+
+            var dir = $"{Path.GetTempPath()}/IdleAppStarter/";
+
+            Directory.CreateDirectory(dir);
+            File.AppendAllText(dir + file, formatedMessage + "\n");
+        }
     }
 }
