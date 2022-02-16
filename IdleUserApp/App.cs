@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using IdleSharedLib;
 using Newtonsoft.Json;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,6 +17,7 @@ namespace IdleUserApp
     {
         static bool isIdle = false;
         static bool isPingSuccess = false;
+        static Logger logger = LogManager.GetCurrentClassLogger();
         static void Main(string[] args)
         {
             Parser.Default.ParseArguments<Config>(args)
@@ -25,12 +27,13 @@ namespace IdleUserApp
 
         static void ParsedArgs(Config cfg)
         {
-            Logger.Log($"App start at port {cfg.port}");
+            logger.Info($"App start at port {cfg.port}");
             var runner = new AppRunner(cfg.inputExec.ToList());
             var client = new IpcClient();
 
             client.Initialize(cfg.port, 60000, System.Text.Encoding.UTF8);
 
+            logger.Debug("Invoking pararell functions");
             Parallel.Invoke(
                     () => PingPong(client),
                     () => IdleCheck(cfg, runner)
@@ -39,6 +42,7 @@ namespace IdleUserApp
 
         private static void IdleCheck(Config cfg, AppRunner runner)
         {
+            logger.Info("Idle check invoked");
             var lastIdle = 0L;
             while (true)
             {
@@ -50,7 +54,7 @@ namespace IdleUserApp
                 {
                     if (!isIdle && isPingSuccess) // Status was changed
                     {
-                        Logger.Log($"Current idle time ({idle}ms) > Trigger idle ({cfg.idle}ms)");
+                        logger.Info($"Current idle time ({idle}ms) > Trigger idle ({cfg.idle}ms)");
                         isIdle = true;
                         runner.runAll();
                     }
@@ -59,7 +63,7 @@ namespace IdleUserApp
                 {
                     if (isIdle) // Status was changed
                     {
-                        Logger.Log($"Activity detected. Time spended in idle: {lastIdle}ms");
+                        logger.Info($"Activity detected. Time spended in idle: {lastIdle}ms");
                         isIdle = false;
                         runner.killAll();
                     }
@@ -71,9 +75,10 @@ namespace IdleUserApp
 
         static void PingPong(IpcClient client)
         {
+            logger.Debug("Ping Pong invoked");
             while(true)
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(5000);
                 try
                 {
                     var msg = new Message();
@@ -84,8 +89,8 @@ namespace IdleUserApp
                     isPingSuccess = true;
                 } catch (WebException ex)
                 {
-                    Logger.LogToFile(ex.ToString());
-                    Logger.Log("Can't connect to Service. App will not start any processes, until establishing connection");
+                    logger.Debug(ex.ToString());
+                    logger.Info("Can't connect to Service. App will not start any processes, until establishing connection");
                     isPingSuccess = false;
                 }
             }
