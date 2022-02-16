@@ -17,6 +17,16 @@ namespace LoginIdleService
 
             Parser.Default.ParseArguments<Config>(args)
                 .WithParsed(WithParsed);
+            try
+            {
+                Parser.Default.ParseArguments<Config>(args)
+                .WithParsed(WithParsed)
+                .WithNotParsed(ParserCMD.ArgumentError);
+            } catch(Exception ex)
+            {
+                Logger.Log(ex.ToString());
+                throw;
+            }
         }
 
         static void WithParsed(Config cfg)
