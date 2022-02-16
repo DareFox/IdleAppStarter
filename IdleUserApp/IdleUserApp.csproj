@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <ApplicationIcon>600px.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
