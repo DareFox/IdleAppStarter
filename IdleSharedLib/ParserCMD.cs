@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,22 +10,23 @@ namespace IdleSharedLib
 {
     public class ParserCMD
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         public static void ArgumentError(IEnumerable<Error> obj)
         {
-            Logger.Log("ARGUMENT ERROR.");
+            logger.Error("ARGUMENT ERROR.");
             foreach (var item in obj)
             {
                 switch (item)
                 {
                     case BadFormatConversionError:
-                        Logger.Log("Bad format: " + (item as BadFormatConversionError).NameInfo.NameText);
+                        logger.Error("Bad format: " + (item as BadFormatConversionError).NameInfo.NameText);
                         break;
                     case MissingRequiredOptionError:
-                        Logger.Log("Missing required option: " + (item as MissingRequiredOptionError).NameInfo.NameText);
+                        logger.Error("Missing required option: " + (item as MissingRequiredOptionError).NameInfo.NameText);
                         break;
                     default:
-                        Logger.Log(item.ToString());
-                        Logger.Log("tag: " + item.Tag);
+                        logger.Error(item.ToString());
+                        logger.Error("tag: " + item.Tag);
                         break;
                 }
             }

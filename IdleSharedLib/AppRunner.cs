@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management;
@@ -9,6 +10,7 @@ namespace IdleSharedLib
     {
         private List<string> _executables;
         private List<Process> processes = new List<Process>();
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public AppRunner(List<string> executables)
         {
@@ -21,7 +23,7 @@ namespace IdleSharedLib
             {
                 try
                 {
-                    Logger.Log($"Trying to execute {item}");
+                    logger.Info($"Trying to execute {item}");
                     processes.Add(Process.Start(new ProcessStartInfo()
                     {
                         FileName = item,
@@ -30,11 +32,11 @@ namespace IdleSharedLib
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log("err: " + ex);
+                    logger.Error("err: " + ex);
                 }
             }
 
-            Logger.Log("All executables was started");
+            logger.Info("All executables was started");
         }
 
         public void killAll()
@@ -43,16 +45,16 @@ namespace IdleSharedLib
             {
                 try
                 {
-                    Logger.Log($"Trying to kill ${item.ProcessName} (id: {item.Id})");
+                    logger.Info($"Trying to kill ${item.ProcessName} (id: {item.Id})");
                     KillProcessAndChildren(item.Id);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log("err: " + ex);
+                    logger.Error("err: " + ex);
                 }
             }
 
-            Logger.Log("All processes are killed");
+            logger.Info("All processes are killed");
             processes.Clear();
         }
 
