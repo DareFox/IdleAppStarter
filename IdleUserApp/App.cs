@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using IdleSharedLib;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -74,7 +75,11 @@ namespace IdleUserApp
                 Thread.Sleep(1000);
                 try
                 {
-                    client.Send($"Ping! ID: {Process.GetCurrentProcess().Id}; isIdle: {isIdle}");
+                    var msg = new Message();
+                    msg.IsIdle = isIdle;
+                    msg.ProcessId = Process.GetCurrentProcess().Id;
+
+                    client.Send($"{JsonConvert.SerializeObject(msg)}");
                     isPingSuccess = true;
                 } catch (WebException ex)
                 {
