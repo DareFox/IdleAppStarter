@@ -1,4 +1,4 @@
-﻿namespace IdleUserApp
+﻿namespace IdleSharedLib
 {
     internal struct LASTINPUTINFO
     {

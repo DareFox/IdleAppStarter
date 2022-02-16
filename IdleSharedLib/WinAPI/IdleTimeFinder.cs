@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace IdleUserApp
+namespace IdleSharedLib
 {
     /// <summary>
     /// Helps to find the idle time, (in milliseconds) spent since the last user input

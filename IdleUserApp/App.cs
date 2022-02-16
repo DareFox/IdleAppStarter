@@ -1,6 +1,8 @@
 ﻿using CommandLine;
 using IdleSharedLib;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -17,7 +19,8 @@ namespace IdleUserApp
         static void Main(string[] args)
         {
             Parser.Default.ParseArguments<Config>(args)
-                .WithParsed(ParsedArgs);
+                .WithParsed(ParsedArgs)
+                .WithNotParsed(ParserCMD.ArgumentError);
         }
 
         static void ParsedArgs(Config cfg)
@@ -32,7 +35,6 @@ namespace IdleUserApp
                     () => PingPong(client),
                     () => IdleCheck(cfg, runner)
                 );
-            
         }
 
         private static void IdleCheck(Config cfg, AppRunner runner)
@@ -74,7 +76,11 @@ namespace IdleUserApp
                 Thread.Sleep(1000);
                 try
                 {
-                    client.Send($"Ping! ID: {Process.GetCurrentProcess().Id}; isIdle: {isIdle}");
+                    var msg = new Message();
+                    msg.IsIdle = isIdle;
+                    msg.ProcessId = Process.GetCurrentProcess().Id;
+
+                    client.Send($"{JsonConvert.SerializeObject(msg)}");
                     isPingSuccess = true;
                 } catch (WebException ex)
                 {
