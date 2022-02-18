@@ -245,7 +245,7 @@ namespace IdleSharedLib.WinAPI
             {
                 if (!GetSessionUserToken(ref hUserToken))
                 {
-                    throw new Exception("StartProcessAsCurrentUser: GetSessionUserToken failed.");
+                    throw new SessionUserTokenException();
                 }
 
                 uint dwCreationFlags = CREATE_UNICODE_ENVIRONMENT | (uint)(visible ? CREATE_NEW_CONSOLE : CREATE_NO_WINDOW);
@@ -254,7 +254,7 @@ namespace IdleSharedLib.WinAPI
 
                 if (!CreateEnvironmentBlock(ref pEnv, hUserToken, false))
                 {
-                    throw new Exception("StartProcessAsCurrentUser: CreateEnvironmentBlock failed.");
+                    throw new CreateEnvironmentBlockException();
                 }
 
                 if (!CreateProcessAsUser(hUserToken,
@@ -270,7 +270,7 @@ namespace IdleSharedLib.WinAPI
                     out procInfo))
                 {
                     iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
-                    throw new Exception("StartProcessAsCurrentUser: CreateProcessAsUser failed.  Error Code -" + iResultOfCreateProcessAsUser);
+                    throw new CreateProcessAsUserException(iResultOfCreateProcessAsUser);
                 }
 
                 iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
@@ -289,5 +289,26 @@ namespace IdleSharedLib.WinAPI
             return procInfo;
         }
 
+    }
+
+    class SessionUserTokenException : Exception
+    {
+        public SessionUserTokenException() : base("GetSessionUserToken failed.") { }
+    }
+
+    class CreateProcessAsUserException : Exception
+    {
+        public CreateProcessAsUserException(object errCode) : base($"CreateProcessAsUser failed.  Error Code {errCode}")
+        {
+
+        }
+    } 
+
+    class CreateEnvironmentBlockException : Exception
+    {
+        public CreateEnvironmentBlockException() : base("CreateEnvironmentBlock failed")
+        {
+
+        }
     }
 }
