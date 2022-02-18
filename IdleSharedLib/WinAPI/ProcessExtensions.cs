@@ -291,20 +291,20 @@ namespace IdleSharedLib.WinAPI
 
     }
 
-    class SessionUserTokenException : Exception
+    public class SessionUserTokenException : Exception
     {
         public SessionUserTokenException() : base("GetSessionUserToken failed.") { }
     }
 
-    class CreateProcessAsUserException : Exception
+    public class CreateProcessAsUserException : Exception
     {
         public CreateProcessAsUserException(object errCode) : base($"CreateProcessAsUser failed.  Error Code {errCode}")
         {
 
         }
-    } 
+    }
 
-    class CreateEnvironmentBlockException : Exception
+    public class CreateEnvironmentBlockException : Exception
     {
         public CreateEnvironmentBlockException() : base("CreateEnvironmentBlock failed")
         {
