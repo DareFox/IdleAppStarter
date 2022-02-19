@@ -8,10 +8,10 @@ namespace IdleSharedLib
 {
     public class AppRunner
     {
-        private List<string> _executables;
+        private readonly List<string> _executables;
         private List<Process> processes = new List<Process>();
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        private bool running = false;
+        private bool running;
 
         public AppRunner(List<string> executables)
         {
@@ -28,7 +28,7 @@ namespace IdleSharedLib
                     {
                         logger.Info($"Trying to execute {item}");
 
-                        var process = Process.Start(new ProcessStartInfo()
+                        var process = Process.Start(new ProcessStartInfo
                         {
                             FileName = item,
                             UseShellExecute = false,
