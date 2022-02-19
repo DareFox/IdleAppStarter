@@ -84,14 +84,20 @@ namespace IdleLoginService
         {
             if (clientID != null)
             {
-                var process = Process.GetProcessById((int)clientID);
-
-                // After client crash, another process can have same id as client previously
-                // So also check by process name.
-                // If it's client process name - kill it, else - do nothing
-                if (process.ProcessName == "IdleUserApp")
+                try
                 {
-                    process.Kill();
+                    var process = Process.GetProcessById((int)clientID);
+
+                    // After client crash, another process can have same id as client previously
+                    // So also check by process name.
+                    // If it's client process name - kill it, else - do nothing
+                    if (process.ProcessName == "IdleUserApp")
+                    {
+                        ProcessKillExtensions.KillProcessAndChildren((int)clientID);
+                    }
+                } catch (ArgumentException)
+                {
+                    logger.Info($"Process with an id of {clientID} is not running");
                 }
             }
         }
