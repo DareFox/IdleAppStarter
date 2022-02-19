@@ -10,86 +10,75 @@ namespace IdleLoginService
 {
     public class Service
     {
-        static bool isServiceRunApps = false;
-        static DateTime lastPing = DateTime.Now;
         static Logger logger = LogManager.GetCurrentClassLogger();
+        static AppRunner runner;
+        static ClientManager manager;
+
         static void Main(string[] args)
         {
-
-            Parser.Default.ParseArguments<Config>(args)
-                .WithParsed(WithParsed);
             try
             {
-                Parser.Default.ParseArguments<Config>(args)
-                .WithParsed(WithParsed)
+                Parser.Default.ParseArguments<ServiceConfig>(args)
+                .WithParsed(LaunchService)
                 .WithNotParsed(ParserCMD.ArgumentError);
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                logger.Info(ex.ToString());
+                logger.Fatal(ex);
                 throw;
             }
         }
 
-        static void WithParsed(Config cfg)
+        static void LaunchService(ServiceConfig cfg)
         {
-            logger.Info($"Service start at port {cfg.port}");
-            var appStarter = new AppRunner(cfg.inputExec.ToList());
-            var server = new IpcServer();
-            server.Start(cfg.port);
+            logger.Info("Launched service"); 
+            runner = new AppRunner(cfg.inputExec.ToList());
+            manager = new ClientManager(cfg);
 
-            server.ReceivedRequest += RequestHandler;
+            manager.onTimeout += onTimeoutService;
+            manager.onPing += (ClientManager client, Message msg) => runner.killAll();
 
-            Parallel.Invoke(
-                () => pingObserver(appStarter)
-            );
-        }
+            StartClientUntilSuccess();
+            Thread.Sleep(30000);
+            manager.Kill();
 
-        private static void pingObserver(AppRunner appRunner)
-        {
-            double previousSeconds = 0.0;
             while(true)
             {
-                Thread.Sleep(250);
-
-                // Check if any user app is active
-                // If no apps are not active, we suppose that we on logon screen
-                // So we run apps from service instead of app
-                double secondsFromLastPing = (DateTime.Now - lastPing).TotalSeconds;
-                if (secondsFromLastPing >= 45)
-                {
-                    if (!isServiceRunApps)
-                    {
-                        logger.Info($"Service didn't get ping in {secondsFromLastPing} seconds. Starting executables");
-
-                        // Don't run twice, they are already started
-                        appRunner.runAll();
-
-                        // Change status
-                        isServiceRunApps = true;
-                    }
-                }
-                else
-                {
-                    if (isServiceRunApps)
-                    {
-                        logger.Info($"Service got response from client app. Time spended in idle status: {previousSeconds} seconds. Killing all processes");
-
-                        // Don't kill apps twice, they are already dead
-                        appRunner.killAll();
-
-                        // Change status
-                        isServiceRunApps = false;
-                    }
-                }
-
-                previousSeconds = secondsFromLastPing;
+                Thread.Sleep(int.MaxValue);
             }
         }
 
-        private static void RequestHandler(object sender, ReceivedRequestEventArgs e)
+        private static void StartClientUntilSuccess() // TODO: Change naming to something better than this
         {
-            lastPing = DateTime.Now;
-            logger.Debug(e.Request);
+            var started = false;
+            var runAttempts = 0;
+            // Initialize client
+            while (!started)
+            {
+                started = manager.Start();
+                runAttempts++;
+
+                if (started)
+                {
+                    logger.Trace("SERVICE - client started");
+                    runAttempts = 0;
+                }
+                // After X attemps run apps from service
+                // And try start client again and again, until it will be launched
+                else if (runAttempts > 1)
+                {
+                    runner.runAllOnce();
+                }
+
+                Thread.Sleep(10000); // Cooldown before starting again
+            }
+        }
+
+        private static void onTimeoutService(ClientManager clientManager)
+        {
+            logger.Trace("SERVICE - onTimeoutService invoked");
+            clientManager.Kill();
+            StartClientUntilSuccess();
         }
     }
 }
