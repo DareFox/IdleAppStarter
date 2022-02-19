@@ -15,11 +15,11 @@ namespace IdleLoginService
     class ClientManager : IDisposable
     {
         // Program arguments
-        private int port;
-        private long idleTime;
-        private List<string> executables;
+        private readonly int port;
+        private readonly long idleTime;
+        private readonly List<string> executables;
 
-        private Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger logger = LogManager.GetCurrentClassLogger();
         private long timeoutMS; // in milliseconds, 1000ms = 1sec
         private IpcServer server;
 
@@ -113,7 +113,7 @@ namespace IdleLoginService
         {
             logger.Info(e.Request);
             timeoutTimer?.Change(timeoutMS, 0);
-            onPing.Invoke(this, JsonConvert.DeserializeObject<Message>(e.Request));
+            onPing?.Invoke(this, JsonConvert.DeserializeObject<Message>(e.Request));
         }
 
         public void Dispose()
