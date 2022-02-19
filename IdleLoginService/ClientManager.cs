@@ -12,7 +12,7 @@ using static IdleSharedLib.WinAPI.ProcessExtensions;
 
 namespace IdleLoginService
 {
-    class ClientManager
+    class ClientManager : IDisposable
     {
         // Program arguments
         private int port;
@@ -113,6 +113,11 @@ namespace IdleLoginService
             logger.Info(e.Request);
             timeoutTimer?.Change(timeoutMS, 0);
             onPing.Invoke(this, JsonConvert.DeserializeObject<Message>(e.Request));
+        }
+
+        public void Dispose()
+        {
+            timeoutTimer.Dispose();
         }
     }
 }
