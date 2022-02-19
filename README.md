@@ -1,8 +1,10 @@
-# IdleAppStarter 
+# IdleAppStarter
+
 ![](https://github.com/DareFox/IdleAppStarter/raw/master/githubMedia/600px.png)
 
 ## Purpose
-The goal of IdleStarterApp is to run applications when the user is inactive, even when the user is not logged in 
+
+The goal of IdleStarterApp is to run applications when the user is inactive, even when the user is not logged in
 
 ## Requirements
 
@@ -11,9 +13,10 @@ The goal of IdleStarterApp is to run applications when the user is inactive, eve
 - [.NET Core 5.0 Runtime x64](https://dotnet.microsoft.com/en-us/download/dotnet/5.0)
 
 ## How to install
+
 [Download latest version of IdleAppStarter](https://github.com/DareFox/IdleAppStarter/releases/latest "Download latest version of IdleAppStarter") and then unzip it. For making server-side work as Windows Service you need to download [NSSM](https://nssm.cc/ "NSSM") and unzip it somewhere too.
 
-#### Service-side install: 
+#### Service-side install:
 
 - Open `cmd` in NSSM folder (nssm/win64 or nssm/win32)
 
@@ -22,41 +25,39 @@ The goal of IdleStarterApp is to run applications when the user is inactive, eve
 - Add "IdleLoginService.exe" as executable for service
 
 - Add arguments for service
-
-	  -t, --timeout        (Default: 45000) Connection timeout between client and server in milliseconds
-
-	  -e, --executables    Required. Programms to execute
-
-	  -i, --idle           Required. Idle in ms
-
-	  -p, --port           Required. Port for service communication
+  
+ ```
+ -t, --timeout        (Default: 45000) Connection timeout between client and server in milliseconds
+ -e, --executables    Required. Programms to execute
+ -i, --idle           Required. Idle in ms
+ -p, --port           Required. Port for service communication
+ ```
   
 - Press "Install Service"
 
 ## How it works
-IdleAppStarter consits of two parts: 
 
-`App` — User-side **client** 
+IdleAppStarter consits of two parts:
 
-`Service` — System-side **server** 
+`App` — User-side **client**
+
+`Service` — System-side **server**
 
 ### General Logic
 
-In short, the client watches the user's action and if it is idle, it launches the application. If there are no clients, then the Windows service launches applications on behalf of the system.
+In short, the client watches the user's action and if it is idle, it launches the application. If there are no clients, then the Windows service launches applications on behalf of the system and tries to start client until success. When client was successfully launched, service close all programs which was laucned on his side.
 
 ![](https://raw.githubusercontent.com/DareFox/IdleAppStarter/clientless/githubMedia/Usage.png)
 
 ------------
 
-
 ### Client Logic
+
 The Сlient starts automatically with user authorization in the system and joins the service server. The client watches the user's activity and, depending on his activity, launches or kills applications.
 
 Connecting to the server is necessary in order to inform the service that this client is responsible for the user's behavior and we take all the work for his activity, and not the service.
 
 ![](https://github.com/DareFox/IdleAppStarter/raw/master/githubMedia/ClientLogic.png)
-
-
 
 ------------
 
@@ -68,4 +69,3 @@ Service starts as SYSTEM process and start server, which works even if nobody ar
 
 ## Why didn't you use Task Scheduler for this task
 Task Scheduler doesn't work before login for some reason for this task ¯\_(ツ)_/¯
-
