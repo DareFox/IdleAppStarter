@@ -4,7 +4,6 @@ using NLog;
 using System;
 using System.Linq;
 using System.Threading;
-using ZetaIpc.Runtime.Server;
 
 namespace IdleLoginService
 {
@@ -31,7 +30,7 @@ namespace IdleLoginService
 
         static void LaunchService(ServiceConfig cfg)
         {
-            logger.Info("Launched service"); 
+            logger.Info("Launched service");
             runner = new AppRunner(cfg.inputExec.ToList());
             manager = new ClientManager(cfg);
 
@@ -40,7 +39,7 @@ namespace IdleLoginService
 
             StartClientUntilSuccess();
 
-            while(true)
+            while (true)
             {
                 Thread.Sleep(int.MaxValue);
             }

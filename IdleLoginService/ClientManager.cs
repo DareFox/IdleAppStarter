@@ -95,14 +95,15 @@ namespace IdleLoginService
                     {
                         ProcessKillExtensions.KillProcessAndChildren((int)clientID);
                     }
-                } catch (ArgumentException)
+                }
+                catch (ArgumentException)
                 {
                     logger.Info($"Process with an id of {clientID} is not running");
                 }
             }
         }
 
-        private void Timeout(object? state)
+        private void Timeout(object state)
         {
             logger.Info($"Timeout from client id {clientID}");
             onTimeout.Invoke(this);
