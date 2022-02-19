@@ -8,32 +8,26 @@ The goal of IdleStarterApp is to run applications when the user is inactive, eve
 
 ## Requirements
 
-- [NSSM](https://nssm.cc/)
-
-- [.NET Core 5.0 Runtime x64](https://dotnet.microsoft.com/en-us/download/dotnet/5.0)
+*   [NSSM](https://nssm.cc/)
+*   [.NET Core 5.0 Runtime x64](https://dotnet.microsoft.com/en-us/download/dotnet/5.0)
 
 ## How to install
 
 [Download latest version of IdleAppStarter](https://github.com/DareFox/IdleAppStarter/releases/latest "Download latest version of IdleAppStarter") and then unzip it. For making server-side work as Windows Service you need to download [NSSM](https://nssm.cc/ "NSSM") and unzip it somewhere too.
 
-#### Service-side install:
+*   Open `cmd` in NSSM folder (nssm/win64 or nssm/win32)
+*   Type `nssm install IdleAppStarter`
+*   Add "IdleLoginService.exe" as executable for service
+*   Add arguments for service
 
-- Open `cmd` in NSSM folder (nssm/win64 or nssm/win32)
+<!---->
 
-- Type `nssm install IdleAppStarter`
+    -t, --timeout        (Default: 45000) Connection timeout between client and server in milliseconds
+    -e, --executables    Required. Programms to execute
+    -i, --idle           Required. Idle in ms
+    -p, --port           Required. Port for service communication
 
-- Add "IdleLoginService.exe" as executable for service
-
-- Add arguments for service
-  
- ```
- -t, --timeout        (Default: 45000) Connection timeout between client and server in milliseconds
- -e, --executables    Required. Programms to execute
- -i, --idle           Required. Idle in ms
- -p, --port           Required. Port for service communication
- ```
-  
-- Press "Install Service"
+*   Press "Install Service"
 
 ## How it works
 
@@ -49,7 +43,7 @@ In short, the client watches the user's action and if it is idle, it launches th
 
 ![](https://raw.githubusercontent.com/DareFox/IdleAppStarter/clientless/githubMedia/Usage.png)
 
-------------
+***
 
 ### Client Logic
 
@@ -59,7 +53,7 @@ Connecting to the server is necessary in order to inform the service that this c
 
 ![](https://github.com/DareFox/IdleAppStarter/raw/master/githubMedia/ClientLogic.png)
 
-------------
+***
 
 ### Service Logic
 
@@ -68,4 +62,5 @@ Service starts as SYSTEM process and start server, which works even if nobody ar
 ![](https://github.com/DareFox/IdleAppStarter/blob/clientless/githubMedia/ServiceLogic.png)
 
 ## Why didn't you use Task Scheduler for this task
-Task Scheduler doesn't work before login for some reason for this task ¯\_(ツ)_/¯
+
+Task Scheduler doesn't work before login for some reason for this task ¯\\\_(ツ)\_/¯
