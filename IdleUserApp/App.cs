@@ -14,9 +14,18 @@ namespace IdleUserApp
 {
     class App
     {
-        static bool isIdle = false;
-        static bool isPingSuccess = false;
-        static Logger logger = LogManager.GetCurrentClassLogger();
+        private const int pingPeriod = 5000; // in ms; 5 seconds
+        private const int idleCheckPeriod = 1000; // in ms; 1 second
+
+        private static long lastIdleTime;
+        private static bool lastCheckIdle;
+        private static bool isIdle;
+        private static bool isPingSuccess;
+
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static IpcClient client;
+        private static AppRunner runner;
+        private static Config config;
         static void Main(string[] args)
         {
             try
@@ -33,73 +42,67 @@ namespace IdleUserApp
 
         static void ParsedArgs(Config cfg)
         {
-            logger.Info($"App start at port {cfg.port}");
-            var runner = new AppRunner(cfg.inputExec.ToList());
-            var client = new IpcClient();
+            config = cfg;
 
+            logger.Info($"App start at port {cfg.port}");
+            client = new IpcClient();
             client.Initialize(cfg.port, 60000, System.Text.Encoding.UTF8);
 
-            logger.Debug("Invoking pararell functions");
-            Parallel.Invoke(
-                    () => PingPong(client),
-                    () => IdleCheck(cfg, runner)
-                );
-        }
+            runner = new AppRunner(cfg.inputExec.ToList());
 
-        private static void IdleCheck(Config cfg, AppRunner runner)
-        {
-            logger.Info("Idle check invoked");
-            var lastIdle = 0L;
+            new Timer(PingPong, null, 0, pingPeriod);
+            new Timer(IdleCheck, null, 0, idleCheckPeriod);
+
             while (true)
             {
-                Thread.Sleep(1000);
-                var idle = IdleTimeFinder.GetIdleTime();
-
-                // TODO: Simplify if's
-                if (idle > cfg.idle)
-                {
-                    if (!isIdle && isPingSuccess) // Status was changed
-                    {
-                        logger.Info($"Current idle time ({idle}ms) > Trigger idle ({cfg.idle}ms)");
-                        isIdle = true;
-                        runner.runAllOnce();
-                    }
-                }
-                else
-                {
-                    if (isIdle) // Status was changed
-                    {
-                        logger.Info($"Activity detected. Time spended in idle: {lastIdle}ms");
-                        isIdle = false;
-                        runner.killAll();
-                    }
-                }
-
-                lastIdle = idle;
+                Thread.Sleep(int.MaxValue);
             }
         }
 
-        static void PingPong(IpcClient client)
+        private static void IdleCheck(object? _)
         {
-            logger.Debug("Ping Pong invoked");
-            while (true)
-            {
-                Thread.Sleep(5000);
-                try
-                {
-                    var msg = new Message();
-                    msg.IsIdle = isIdle;
-                    msg.ProcessId = Process.GetCurrentProcess().Id;
+            logger.Trace("Idle check invoked");
+            var idle = IdleTimeFinder.GetIdleTime();
 
-                    client.Send($"{JsonConvert.SerializeObject(msg)}");
-                    isPingSuccess = true;
-                }
-                catch (WebException ex)
+            if (idle > config.idle)
+            {
+                isIdle = true;
+                if (isIdle != lastCheckIdle) // Call code block only when status changes
                 {
-                    logger.Debug(ex.ToString());
-                    logger.Info("Can't connect to Service. App will not start any processes, until establishing connection");
-                    isPingSuccess = false;
+                    logger.Info($"Current idle time ({idle}ms) > Trigger idle ({config.idle}ms)");
+                    runner.runAllOnce();
                 }
+            }
+            else
+            {
+                isIdle = false;
+                if (isIdle != lastCheckIdle) // Call code block only when status changes
+                {
+                    logger.Info($"Activity detected. Time spended in idle: {lastIdleTime}ms");
+                    runner.killAll();
+                }
+            }
+
+            lastIdleTime = idle;
+            lastCheckIdle = isIdle;
+        }
+
+        static void PingPong(object? _)
+        {
+            logger.Trace("Ping Pong invoked");
+            try
+            {
+                var msg = new Message();
+                msg.IsIdle = isIdle;
+                msg.ProcessId = Process.GetCurrentProcess().Id;
+
+                client.Send(JsonConvert.SerializeObject(msg));
+                isPingSuccess = true;
+            }
+            catch (WebException)
+            {
+                logger.Info("Can't connect to Service. App will not start any processes, until establishing connection");
+                isPingSuccess = false;
             }
         }
     }
