@@ -39,8 +39,6 @@ namespace IdleLoginService
             manager.onPing += (ClientManager client, Message msg) => runner.killAll();
 
             StartClientUntilSuccess();
-            Thread.Sleep(30000);
-            manager.Kill();
 
             while(true)
             {
