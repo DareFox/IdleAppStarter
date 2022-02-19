@@ -12,7 +12,7 @@ using ZetaIpc.Runtime.Client;
 
 namespace IdleUserApp
 {
-    class App
+    class App : IDisposable
     {
         private const int pingPeriod = 5000; // in ms; 5 seconds
         private const int idleCheckPeriod = 1000; // in ms; 1 second
@@ -26,6 +26,9 @@ namespace IdleUserApp
         private static IpcClient client;
         private static AppRunner runner;
         private static Config config;
+
+        private static Timer idleCheckTimer;
+        private static Timer pingPongTimer;
         static void Main(string[] args)
         {
             try
@@ -59,7 +62,7 @@ namespace IdleUserApp
             }
         }
 
-        private static void IdleCheck(object? _)
+        private static void IdleCheck(object _)
         {
             logger.Trace("Idle check invoked");
             var idle = IdleTimeFinder.GetIdleTime();
@@ -87,7 +90,7 @@ namespace IdleUserApp
             lastCheckIdle = isIdle;
         }
 
-        static void PingPong(object? _)
+        static void PingPong(object _)
         {
             logger.Trace("Ping Pong invoked");
             try
@@ -104,6 +107,12 @@ namespace IdleUserApp
                 logger.Info("Can't connect to Service. App will not start any processes, until establishing connection");
                 isPingSuccess = false;
             }
+        }
+
+        void IDisposable.Dispose()
+        {
+            idleCheckTimer.Dispose();
+            pingPongTimer.Dispose();
         }
     }
 }
