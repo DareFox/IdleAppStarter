@@ -20,7 +20,7 @@ namespace IdleLoginService
         private List<string> executables;
 
         private Logger logger = LogManager.GetCurrentClassLogger();
-        private int timeoutMS = 45000; // in milliseconds, 1000ms = 1sec
+        private long timeoutMS; // in milliseconds, 1000ms = 1sec
         private IpcServer server;
 
         // Process control
@@ -37,12 +37,13 @@ namespace IdleLoginService
         /// </summary>
         public event Action<ClientManager> onTimeout;
 
-        public ClientManager(Config cfg)
+        public ClientManager(ServiceConfig cfg)
         {
             port = cfg.port;
             idleTime = cfg.idle;
             executables = cfg.inputExec.ToList();
             server = new IpcServer();
+            timeoutMS = cfg.connectionTimeoutMS;
 
             server.Start(port);
             server.ReceivedRequest += MessageHandler;
