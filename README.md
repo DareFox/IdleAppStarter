@@ -1,4 +1,7 @@
 # IdleAppStarter 
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/a157abb1266843dc87ac8ea730ad27bd)](https://app.codacy.com/gh/DareFox/IdleAppStarter?utm_source=github.com&utm_medium=referral&utm_content=DareFox/IdleAppStarter&utm_campaign=Badge_Grade_Settings)
+
 ![](https://github.com/DareFox/IdleAppStarter/raw/master/githubMedia/600px.png)
 
 ## Purpose
