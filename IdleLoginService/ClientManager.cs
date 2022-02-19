@@ -28,12 +28,12 @@ namespace IdleLoginService
         private Timer timeoutTimer;
 
         /// <summary>
-        /// Called on ping from client. Int arguments is id process of client
+        /// Called on ping from client. Event provides this instance of ClientManager
         /// </summary>
         public event Action<ClientManager, Message> onPing;
 
         /// <summary>
-        /// Called when client isn't responding. Int argument is id process of client
+        /// Called when client isn't responding. Event provides this instance of ClientManager
         /// </summary>
         public event Action<ClientManager> onTimeout;
 
