@@ -4,10 +4,9 @@ using NLog;
 using System;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using ZetaIpc.Runtime.Server;
 
-namespace LoginIdleService
+namespace IdleLoginService
 {
     public class Service
     {
