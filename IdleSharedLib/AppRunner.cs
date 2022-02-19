@@ -11,51 +11,74 @@ namespace IdleSharedLib
         private List<string> _executables;
         private List<Process> processes = new List<Process>();
         private static Logger logger = LogManager.GetCurrentClassLogger();
+        private bool running = false;
 
         public AppRunner(List<string> executables)
         {
             _executables = executables;
         }
 
-        public void runAll()
+        public void runAllOnce()
         {
-            foreach (var item in _executables)
+            if (!running)
             {
-                try
+                foreach (var item in _executables)
                 {
-                    logger.Info($"Trying to execute {item}");
-                    processes.Add(Process.Start(new ProcessStartInfo()
+                    try
                     {
-                        FileName = item,
-                        UseShellExecute = false
-                    }));
-                }
-                catch (Exception ex)
-                {
-                    logger.Error("err: " + ex);
-                }
-            }
+                        logger.Info($"Trying to execute {item}");
 
-            logger.Info("All executables was started");
+                        var process = Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = item,
+                            UseShellExecute = false,
+                        });
+
+                        processes.Add(process);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error("err: " + ex);
+                    }
+                }
+
+                running = true;
+                logger.Info("All executables was started");
+            }
+        }
+
+        private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public void killAll()
         {
-            foreach (var item in processes)
+            if (running)
             {
-                try
+                foreach (var item in processes)
                 {
-                    logger.Info($"Trying to kill ${item.ProcessName} (id: {item.Id})");
-                    KillProcessAndChildren(item.Id);
+                    try
+                    {
+                        logger.Info($"Trying to kill ${item.ProcessName} (id: {item.Id})");
+                        KillProcessAndChildren(item.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error("err: " + ex);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    logger.Error("err: " + ex);
-                }
+
+                logger.Info("All processes are killed");
+                processes.Clear();
             }
 
-            logger.Info("All processes are killed");
-            processes.Clear();
+            running = false;
         }
 
         private static void KillProcessAndChildren(int pid)
