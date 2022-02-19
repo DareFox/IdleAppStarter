@@ -3,7 +3,6 @@ using IdleSharedLib;
 using Newtonsoft.Json;
 using NLog;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -20,9 +19,16 @@ namespace IdleUserApp
         static Logger logger = LogManager.GetCurrentClassLogger();
         static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<Config>(args)
+            try
+            {
+                Parser.Default.ParseArguments<Config>(args)
                 .WithParsed(ParsedArgs)
                 .WithNotParsed(ParserCMD.ArgumentError);
+            }
+            catch (Exception ex)
+            {
+                logger.Fatal(ex);
+            }
         }
 
         static void ParsedArgs(Config cfg)
@@ -56,7 +62,7 @@ namespace IdleUserApp
                     {
                         logger.Info($"Current idle time ({idle}ms) > Trigger idle ({cfg.idle}ms)");
                         isIdle = true;
-                        runner.runAll();
+                        runner.runAllOnce();
                     }
                 }
                 else
@@ -76,7 +82,7 @@ namespace IdleUserApp
         static void PingPong(IpcClient client)
         {
             logger.Debug("Ping Pong invoked");
-            while(true)
+            while (true)
             {
                 Thread.Sleep(5000);
                 try
@@ -87,7 +93,8 @@ namespace IdleUserApp
 
                     client.Send($"{JsonConvert.SerializeObject(msg)}");
                     isPingSuccess = true;
-                } catch (WebException ex)
+                }
+                catch (WebException ex)
                 {
                     logger.Debug(ex.ToString());
                     logger.Info("Can't connect to Service. App will not start any processes, until establishing connection");
