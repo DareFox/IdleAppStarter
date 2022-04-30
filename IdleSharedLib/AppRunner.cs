@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using static IdleSharedLib.WinAPI.ProcessKillExtensions;
 
 namespace IdleSharedLib
@@ -28,10 +29,16 @@ namespace IdleSharedLib
                     {
                         logger.Info($"Trying to execute {item}");
 
+                        var splittedCommand = item.Split(" ").ToList();
+
+                        var file = splittedCommand[0];
+                        var arguments = splittedCommand.Skip(1);
+
                         var process = Process.Start(new ProcessStartInfo
                         {
-                            FileName = item,
+                            FileName = file,
                             UseShellExecute = false,
+                            Arguments = String.Join(" ", arguments)
                         });
 
                         processes.Add(process);
